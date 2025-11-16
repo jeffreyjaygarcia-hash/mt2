@@ -1,0 +1,104 @@
+{
+  "tier1_players": {
+    "description": "Investment grade - no price limits",
+    "players": [
+      "Stephen Curry",
+      "Buster Posey",
+      "Patrick Willis"
+    ]
+  },
+  "tier2_players": {
+    "description": "Collection/Display pieces",
+    "price_min": 50,
+    "price_max": 500,
+    "players": [
+      "Klay Thompson",
+      "George Kittle", 
+      "Christian McCaffrey",
+      "Frank Gore",
+      "Madison Bumgarner",
+      "Tim Lincecum",
+      "Matt Cain",
+      "Hunter Pence"
+    ]
+  },
+  "golf_players": {
+    "description": "Golf memorabilia",
+    "price_min": 50,
+    "price_max": 1000,
+    "players": [
+      "Tiger Woods",
+      "Scottie Scheffler"
+    ]
+  },
+  "inscription_patterns": {
+    "championships": ["WS Champ", "World Series", "NBA Champ", "Finals MVP", "Super Bowl", "SB"],
+    "awards": ["Cy Young", "MVP", "DPOY", "ROY", "Rookie of the Year", "All-Star", "Pro Bowl", "All-Pro"],
+    "records": ["756", "3PT", "Perfect Game", "No Hitter", "HOF", "Hall of Fame"],
+    "dynasties": ["Even Year", "Splash Brothers", "Core Four", "Dynasty"],
+    "achievements": ["Gold Medal", "Olympic", "Masters", "US Open", "Major"]
+  },
+  "authentication_services": [
+    "PSA/DNA",
+    "PSA",
+    "JSA",
+    "James Spence",
+    "BAS",
+    "Beckett",
+    "Fanatics",
+    "Steiner",
+    "MLB",
+    "NFL",
+    "PGA",
+    "Upper Deck",
+    "Tristar"
+  ],
+  "item_types": {
+    "priority": ["jersey", "game used", "game worn", "signed ball", "signed photo", "autographed"],
+    "exclude": ["card", "rookie card", "print", "poster", "unsigned"]
+  },
+  "platforms": {
+    "ebay": {
+      "enabled": true,
+      "search_completed": true,
+      "lookback_days": 90
+    },
+    "pwcc": {
+      "enabled": true,
+      "url": "https://www.pwccmarketplace.com"
+    },
+    "goldin": {
+      "enabled": true,
+      "url": "https://goldinauctions.com"
+    },
+    "heritage": {
+      "enabled": true,
+      "url": "https://sports.ha.com"
+    },
+    "pristine": {
+      "enabled": true,
+      "url": "https://www.pristineauction.com"
+    }
+  },
+  "scoring_weights": {
+    "price_vs_average": 30,
+    "authentication_quality": 25,
+    "inscription_present": 20,
+    "item_condition": 15,
+    "seller_reputation": 10
+  },
+  "email_config": {
+    "enabled": true,
+    "send_time": "07:00",
+    "subject": "Daily Memorabilia Finds - Bay Area Sports"
+  },
+  "dashboard_sections": [
+    "priority_alerts",
+    "inscribed_championship",
+    "game_used",
+    "signed_balls_photos",
+    "dynasty_team_items",
+    "golf_section",
+    "market_intelligence"
+  ]
+}
