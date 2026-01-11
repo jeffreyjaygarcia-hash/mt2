@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Astronaut Jar</title>
+  <!--
+    ============================================================
+    ASTRONAUT JAR - Customization Guide
+    ============================================================
+
+    TITLE TEXT:
+    - Change the <title> tag above
+    - Change the .title content in the HTML body below (search for "Astronaut Jar")
+
+    COLORS:
+    - --bg-dark: Main background color
+    - --jar-bg: Jar background color
+    - --jar-border: Jar border/glow color
+    - --btn-add: "Add Astronaut" button color
+    - --btn-undo: "Undo" button color
+    - --btn-reset: "Reset" button color
+    - --text-light: Main text color
+    - --text-gold: Accent/count text color
+
+    LOCALSTORAGE KEY:
+    - Search for "STORAGE_KEY" in the JavaScript section
+    - Default is "astronautJarCount"
+
+    STATUS MESSAGES:
+    - Search for "STATUS MESSAGES" in the JavaScript section
+    - Modify MSG_ADD, MSG_UNDO, MSG_RESET as desired
+    ============================================================
+  -->
+  <style>
+    /* ==================== COLOR VARIABLES ==================== */
+    :root {
+      --bg-dark: #0a0a1a;
+      --jar-bg: rgba(20, 30, 60, 0.7);
+      --jar-border: #4a9eff;
+      --btn-add: #22c55e;
+      --btn-add-hover: #16a34a;
+      --btn-undo: #f59e0b;
+      --btn-undo-hover: #d97706;
+      --btn-reset: #ef4444;
+      --btn-reset-hover: #dc2626;
+      --text-light: #ffffff;
+      --text-gold: #ffd700;
+      --star-color: #ffffff;
+    }
+
+    /* ==================== BASE STYLES ==================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+    }
+
+    /* ==================== STARS BACKGROUND ==================== */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: var(--star-color);
+      border-radius: 50%;
+      animation: twinkle 2s infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* ==================== MAIN CONTAINER ==================== */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 400px;
+      z-index: 1;
+    }
+
+    /* ==================== TITLE ==================== */
+    .title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 0 0 20px rgba(74, 158, 255, 0.8),
+                   0 0 40px rgba(74, 158, 255, 0.4);
+      margin-bottom: 10px;
+    }
+
+    .title-emoji {
+      font-size: 2rem;
+    }
+
+    /* ==================== JAR ==================== */
+    .jar {
+      background: var(--jar-bg);
+      border: 4px solid var(--jar-border);
+      border-radius: 20px 20px 40px 40px;
+      padding: 30px 40px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 30px rgba(74, 158, 255, 0.4),
+                  inset 0 0 60px rgba(74, 158, 255, 0.1);
+      width: 100%;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Jar lid */
+    .jar::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 20px;
+      background: linear-gradient(to bottom, #6b7280, #4b5563);
+      border-radius: 10px 10px 0 0;
+      border: 3px solid #9ca3af;
+    }
+
+    .count {
+      font-size: 6rem;
+      font-weight: bold;
+      color: var(--text-gold);
+      text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+      line-height: 1;
+    }
+
+    .label {
+      font-size: 1.3rem;
+      color: var(--text-light);
+      opacity: 0.9;
+      margin-top: 10px;
+    }
+
+    .astronaut-display {
+      font-size: 2rem;
+      margin-top: 10px;
+    }
+
+    /* ==================== STATUS MESSAGE ==================== */
+    .status {
+      min-height: 30px;
+      font-size: 1.1rem;
+      color: var(--text-gold);
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .status.show {
+      opacity: 1;
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+    }
+
+    .btn {
+      padding: 20px 30px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-add {
+      background: var(--btn-add);
+      color: white;
+      box-shadow: 0 6px 0 var(--btn-add-hover),
+                  0 8px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-add:active {
+      box-shadow: 0 2px 0 var(--btn-add-hover),
+                  0 4px 10px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-undo {
+      background: var(--btn-undo);
+      color: white;
+      box-shadow: 0 6px 0 var(--btn-undo-hover),
+                  0 8px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-undo:active {
+      box-shadow: 0 2px 0 var(--btn-undo-hover),
+                  0 4px 10px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-reset {
+      background: var(--btn-reset);
+      color: white;
+      box-shadow: 0 6px 0 var(--btn-reset-hover),
+                  0 8px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-reset:active {
+      box-shadow: 0 2px 0 var(--btn-reset-hover),
+                  0 4px 10px rgba(239, 68, 68, 0.4);
+    }
+
+    /* ==================== FLOATING ASTRONAUT ANIMATION ==================== */
+    .floating-astronaut {
+      position: fixed;
+      font-size: 4rem;
+      pointer-events: none;
+      z-index: 100;
+      animation: floatToJar 1s ease-in forwards;
+    }
+
+    @keyframes floatToJar {
+      0% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.3) rotate(180deg);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.3) rotate(360deg);
+      }
+    }
+
+    /* ==================== CELEBRATION EFFECT ==================== */
+    .jar.celebrate {
+      animation: celebrate 0.5s ease;
+    }
+
+    @keyframes celebrate {
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.05); }
+      50% { transform: scale(1.02); }
+      75% { transform: scale(1.04); }
+    }
+
+    /* ==================== RESPONSIVE ADJUSTMENTS ==================== */
+    @media (min-width: 768px) {
+      .title {
+        font-size: 3rem;
+      }
+      .count {
+        font-size: 8rem;
+      }
+      .jar {
+        padding: 40px 60px;
+        min-height: 250px;
+      }
+      .btn {
+        padding: 25px 40px;
+        font-size: 1.6rem;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .container {
+        gap: 10px;
+      }
+      .jar {
+        padding: 20px 30px;
+        min-height: 150px;
+      }
+      .count {
+        font-size: 4rem;
+      }
+      .title {
+        font-size: 2rem;
+      }
+      .btn {
+        padding: 15px 25px;
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Stars Background -->
+  <div class="stars" id="stars"></div>
+
+  <div class="container">
+    <!-- ==================== TITLE (Change text here) ==================== -->
+    <h1 class="title">
+      <span class="title-emoji">🚀</span> Astronaut Jar <span class="title-emoji">🌟</span>
+    </h1>
+
+    <!-- Jar Display -->
+    <div class="jar" id="jar">
+      <div class="count" id="count">0</div>
+      <div class="label">Astronauts earned</div>
+      <div class="astronaut-display">🧑‍🚀</div>
+    </div>
+
+    <!-- Status Message -->
+    <div class="status" id="status"></div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button class="btn btn-add" id="btnAdd">🧑‍🚀 + Add Astronaut</button>
+      <button class="btn btn-undo" id="btnUndo">↩️ Undo</button>
+      <button class="btn btn-reset" id="btnReset">🗑️ Reset Jar</button>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       ASTRONAUT JAR - JavaScript
+       ============================================================ */
+
+    // ==================== LOCALSTORAGE KEY (Change here) ====================
+    const STORAGE_KEY = 'astronautJarCount';
+
+    // ==================== STATUS MESSAGES (Change here) ====================
+    const MSG_ADD = 'Nice choice! New astronaut added. 🎉';
+    const MSG_UNDO = 'Last astronaut removed. 😢';
+    const MSG_RESET = 'Jar reset. Start fresh! ✨';
+    const MSG_EMPTY = 'Jar is already empty!';
+    const MSG_RESET_CANCELLED = 'Reset cancelled.';
+
+    // ==================== DOM ELEMENTS ====================
+    const countEl = document.getElementById('count');
+    const statusEl = document.getElementById('status');
+    const jarEl = document.getElementById('jar');
+    const btnAdd = document.getElementById('btnAdd');
+    const btnUndo = document.getElementById('btnUndo');
+    const btnReset = document.getElementById('btnReset');
+    const starsEl = document.getElementById('stars');
+
+    // ==================== STATE ====================
+    let astronautCount = 0;
+    let statusTimeout = null;
+
+    // ==================== FUNCTIONS ====================
+
+    // Load count from localStorage
+    function loadCount() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved !== null) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 0) {
+          astronautCount = parsed;
+        }
+      }
+      updateDisplay();
+    }
+
+    // Save count to localStorage
+    function saveCount() {
+      localStorage.setItem(STORAGE_KEY, astronautCount.toString());
+    }
+
+    // Update the display
+    function updateDisplay() {
+      countEl.textContent = astronautCount;
+    }
+
+    // Show status message
+    function showStatus(message) {
+      if (statusTimeout) {
+        clearTimeout(statusTimeout);
+      }
+      statusEl.textContent = message;
+      statusEl.classList.add('show');
+      statusTimeout = setTimeout(() => {
+        statusEl.classList.remove('show');
+      }, 2500);
+    }
+
+    // Celebrate animation on jar
+    function celebrateJar() {
+      jarEl.classList.remove('celebrate');
+      // Trigger reflow to restart animation
+      void jarEl.offsetWidth;
+      jarEl.classList.add('celebrate');
+    }
+
+    // Create floating astronaut animation
+    function createFloatingAstronaut() {
+      const astronaut = document.createElement('div');
+      astronaut.className = 'floating-astronaut';
+      astronaut.textContent = '🧑‍🚀';
+
+      // Start from button position
+      const btnRect = btnAdd.getBoundingClientRect();
+      const jarRect = jarEl.getBoundingClientRect();
+
+      astronaut.style.left = (btnRect.left + btnRect.width / 2 - 30) + 'px';
+      astronaut.style.top = (btnRect.top) + 'px';
+
+      // Set end position for animation
+      const endX = jarRect.left + jarRect.width / 2 - 30;
+      const endY = jarRect.top + jarRect.height / 2 - 30;
+
+      astronaut.style.setProperty('--end-x', endX + 'px');
+      astronaut.style.setProperty('--end-y', endY + 'px');
+
+      document.body.appendChild(astronaut);
+
+      // Animate to jar center
+      astronaut.animate([
+        {
+          left: astronaut.style.left,
+          top: astronaut.style.top,
+          opacity: 1
+        },
+        {
+          left: endX + 'px',
+          top: endY + 'px',
+          opacity: 0
+        }
+      ], {
+        duration: 800,
+        easing: 'ease-in'
+      });
+
+      // Remove after animation
+      setTimeout(() => {
+        astronaut.remove();
+      }, 800);
+    }
+
+    // Add astronaut
+    function addAstronaut() {
+      astronautCount++;
+      saveCount();
+      updateDisplay();
+      showStatus(MSG_ADD);
+      createFloatingAstronaut();
+      celebrateJar();
+    }
+
+    // Undo (remove last astronaut)
+    function undoAstronaut() {
+      if (astronautCount > 0) {
+        astronautCount--;
+        saveCount();
+        updateDisplay();
+        showStatus(MSG_UNDO);
+      } else {
+        showStatus(MSG_EMPTY);
+      }
+    }
+
+    // Reset jar
+    function resetJar() {
+      if (confirm('Are you sure you want to reset the jar to 0?')) {
+        astronautCount = 0;
+        saveCount();
+        updateDisplay();
+        showStatus(MSG_RESET);
+      } else {
+        showStatus(MSG_RESET_CANCELLED);
+      }
+    }
+
+    // Create starry background
+    function createStars() {
+      const starCount = 100;
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = (Math.random() * 3 + 1) + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 2 + 's';
+        star.style.animationDuration = (Math.random() * 2 + 1) + 's';
+        starsEl.appendChild(star);
+      }
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    btnAdd.addEventListener('click', addAstronaut);
+    btnUndo.addEventListener('click', undoAstronaut);
+    btnReset.addEventListener('click', resetJar);
+
+    // ==================== INITIALIZATION ====================
+    createStars();
+    loadCount();
+  </script>
+</body>
+</html>
