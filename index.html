@@ -6,7 +6,7 @@
   <title>Astronaut Jar</title>
   <!--
     ============================================================
-    ASTRONAUT JAR - Rocket Edition
+    ASTRONAUT JAR - Rocket Edition v2
     ============================================================
 
     CUSTOMIZATION:
@@ -19,11 +19,8 @@
   <style>
     /* ==================== COLOR VARIABLES ==================== */
     :root {
-      --bg-dark: #0a0a1a;
-      --rocket-body: linear-gradient(135deg, #e8e8e8 0%, #c0c0c0 50%, #a8a8a8 100%);
-      --rocket-tip: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
-      --rocket-window: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-      --rocket-fin: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
+      --bg-dark: #0b0b2a;
+      --bg-gradient: linear-gradient(180deg, #0b0b2a 0%, #1a1a4a 50%, #2d1b4e 100%);
       --btn-add: #22c55e;
       --btn-undo: #f59e0b;
       --btn-reset: #ef4444;
@@ -46,7 +43,7 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--bg-dark);
+      background: var(--bg-gradient);
       color: var(--text-light);
       display: flex;
       flex-direction: column;
@@ -54,7 +51,7 @@
       justify-content: center;
       min-height: 100vh;
       min-height: -webkit-fill-available;
-      padding: 15px;
+      padding: 10px;
       position: relative;
       overflow: hidden;
     }
@@ -88,7 +85,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
       width: 100%;
       max-width: 400px;
       z-index: 1;
@@ -96,11 +93,13 @@
 
     /* ==================== COUNT DISPLAY ==================== */
     .count-display {
-      font-size: 4rem;
+      font-size: 4.5rem;
       font-weight: bold;
       color: var(--text-gold);
-      text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-      min-height: 70px;
+      text-shadow: 0 0 30px rgba(255, 215, 0, 0.6),
+                   0 4px 8px rgba(0,0,0,0.5);
+      min-height: 80px;
+      line-height: 1;
     }
 
     /* ==================== ROCKET CONTAINER ==================== */
@@ -110,75 +109,107 @@
       display: flex;
       justify-content: center;
       align-items: flex-end;
-      height: 350px;
+      height: 420px;
     }
 
     .rocket {
       position: relative;
-      width: 140px;
-      height: 300px;
+      width: 180px;
+      height: 380px;
       transition: transform 0.1s ease;
     }
 
     .rocket.shake {
-      animation: shake 0.5s ease-in-out;
+      animation: shake 0.6s ease-in-out;
     }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-      20%, 40%, 60%, 80% { transform: translateX(5px); }
+      0%, 100% { transform: translateX(0) translateY(0); }
+      10% { transform: translateX(-8px) translateY(-2px); }
+      20% { transform: translateX(8px) translateY(2px); }
+      30% { transform: translateX(-8px) translateY(-1px); }
+      40% { transform: translateX(8px) translateY(1px); }
+      50% { transform: translateX(-6px) translateY(-2px); }
+      60% { transform: translateX(6px) translateY(2px); }
+      70% { transform: translateX(-4px) translateY(-1px); }
+      80% { transform: translateX(4px) translateY(1px); }
+      90% { transform: translateX(-2px) translateY(0); }
     }
 
     .rocket.liftoff {
-      animation: liftoff 2s ease-in forwards;
+      animation: liftoff 2.5s ease-in forwards;
     }
 
     @keyframes liftoff {
       0% { transform: translateY(0); }
-      10% { transform: translateY(10px); }
-      100% { transform: translateY(-150vh); }
+      5% { transform: translateY(5px); }
+      15% { transform: translateY(0); }
+      100% { transform: translateY(-200vh) rotate(5deg); }
     }
 
-    /* Rocket Nose Cone */
+    /* ==================== ROCKET DESIGN ==================== */
+
+    /* Nose Cone - Red pointed tip */
     .rocket-nose {
       position: absolute;
       top: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 40px solid transparent;
-      border-right: 40px solid transparent;
-      border-bottom: 60px solid #ee5253;
+      width: 100px;
+      height: 80px;
+      background: linear-gradient(135deg, #ff4444 0%, #cc0000 50%, #aa0000 100%);
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+      box-shadow: inset -15px 0 30px rgba(0,0,0,0.3),
+                  inset 10px 0 20px rgba(255,255,255,0.2);
       z-index: 3;
     }
 
-    .rocket-nose::after {
-      content: '';
+    /* Porthole Window */
+    .rocket-window {
       position: absolute;
-      top: 35px;
+      top: 90px;
       left: 50%;
       transform: translateX(-50%);
-      width: 20px;
-      height: 20px;
-      background: var(--rocket-window);
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, #87CEEB 0%, #4A90D9 50%, #2E5A8B 100%);
       border-radius: 50%;
-      border: 3px solid #5a9fd4;
-      box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
+      border: 5px solid #888;
+      box-shadow: inset 0 0 20px rgba(255,255,255,0.5),
+                  0 0 10px rgba(0,0,0,0.5),
+                  inset -5px -5px 15px rgba(0,0,0,0.3);
+      z-index: 4;
     }
 
-    /* Rocket Body */
+    .rocket-window::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 12px;
+      height: 12px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 50%;
+    }
+
+    /* Rocket Body - Silver/White main body */
     .rocket-body {
       position: absolute;
-      top: 55px;
+      top: 75px;
       left: 50%;
       transform: translateX(-50%);
-      width: 80px;
-      height: 200px;
-      background: var(--rocket-body);
-      border-radius: 10px;
-      box-shadow: inset -10px 0 20px rgba(0,0,0,0.2);
+      width: 100px;
+      height: 240px;
+      background: linear-gradient(90deg,
+        #a0a0a0 0%,
+        #d0d0d0 15%,
+        #f5f5f5 30%,
+        #ffffff 50%,
+        #f5f5f5 70%,
+        #d0d0d0 85%,
+        #a0a0a0 100%);
+      border-radius: 5px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.4);
       overflow: hidden;
       z-index: 2;
     }
@@ -186,111 +217,155 @@
     /* Jar area inside rocket body */
     .jar-area {
       position: absolute;
-      bottom: 10px;
-      left: 5px;
-      right: 5px;
-      top: 30px;
+      bottom: 15px;
+      left: 8px;
+      right: 8px;
+      top: 80px;
       border-radius: 5px;
       overflow: hidden;
     }
 
-    /* Rocket Fins */
+    /* Body stripes/details */
+    .rocket-body::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(90deg,
+        #666 0%,
+        #888 15%,
+        #999 50%,
+        #888 85%,
+        #666 100%);
+    }
+
+    /* Rocket Fins - More realistic angled fins */
     .rocket-fin {
       position: absolute;
-      bottom: 20px;
-      width: 30px;
-      height: 60px;
-      background: var(--rocket-fin);
+      bottom: 10px;
+      width: 45px;
+      height: 90px;
       z-index: 1;
     }
 
     .rocket-fin.left {
-      left: 0;
-      border-radius: 50% 0 0 50%;
-      transform: skewY(-20deg);
+      left: -5px;
+      background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+      clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 40% 0%);
+      box-shadow: -3px 3px 10px rgba(0,0,0,0.4);
     }
 
     .rocket-fin.right {
-      right: 0;
-      border-radius: 0 50% 50% 0;
-      transform: skewY(20deg);
+      right: -5px;
+      background: linear-gradient(225deg, #ff4444 0%, #cc0000 100%);
+      clip-path: polygon(0% 0%, 0% 100%, 100% 100%, 60% 0%);
+      box-shadow: 3px 3px 10px rgba(0,0,0,0.4);
     }
 
-    /* Rocket Base */
-    .rocket-base {
+    /* Engine/Thruster */
+    .rocket-engine {
       position: absolute;
-      bottom: 0;
+      bottom: -15px;
       left: 50%;
       transform: translateX(-50%);
-      width: 90px;
-      height: 30px;
-      background: linear-gradient(to bottom, #666, #444);
-      border-radius: 0 0 10px 10px;
+      width: 50px;
+      height: 35px;
+      background: linear-gradient(to bottom, #555, #333, #222);
+      border-radius: 5px 5px 15px 15px;
       z-index: 2;
+    }
+
+    .rocket-engine::before {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 25px;
+      background: linear-gradient(to bottom, #222, #111);
+      border-radius: 3px 3px 10px 10px;
     }
 
     /* Flames */
     .flames {
       position: absolute;
-      bottom: -60px;
+      bottom: -120px;
       left: 50%;
       transform: translateX(-50%);
-      width: 60px;
-      height: 80px;
+      width: 80px;
+      height: 120px;
       opacity: 0;
       z-index: 0;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.3s ease;
     }
 
     .flames.active {
       opacity: 1;
-      animation: flicker 0.1s infinite alternate;
     }
 
     .flame {
       position: absolute;
       bottom: 0;
-      border-radius: 50% 50% 50% 50%;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
     }
 
     .flame.main {
       left: 50%;
       transform: translateX(-50%);
-      width: 40px;
-      height: 70px;
-      background: linear-gradient(to top, #ff4500, #ff8c00, #ffd700);
-      animation: flameMain 0.15s infinite alternate;
+      width: 50px;
+      height: 100px;
+      background: linear-gradient(to top,
+        rgba(255,69,0,0.9) 0%,
+        rgba(255,140,0,0.9) 30%,
+        rgba(255,200,0,0.9) 60%,
+        rgba(255,255,200,0.9) 100%);
+      animation: flameMain 0.08s infinite alternate;
     }
 
-    .flame.left {
+    .flame.inner {
+      left: 50%;
+      transform: translateX(-50%);
+      width: 25px;
+      height: 70px;
+      background: linear-gradient(to top,
+        rgba(255,200,100,1) 0%,
+        rgba(255,255,200,1) 50%,
+        rgba(255,255,255,0.9) 100%);
+      animation: flameInner 0.06s infinite alternate;
+    }
+
+    .flame.left-outer {
       left: 5px;
-      width: 20px;
-      height: 40px;
-      background: linear-gradient(to top, #ff4500, #ff6b35);
+      width: 25px;
+      height: 60px;
+      background: linear-gradient(to top, #ff4500, #ff6b35, transparent);
       animation: flameSide 0.1s infinite alternate;
     }
 
-    .flame.right {
+    .flame.right-outer {
       right: 5px;
-      width: 20px;
-      height: 40px;
-      background: linear-gradient(to top, #ff4500, #ff6b35);
+      width: 25px;
+      height: 60px;
+      background: linear-gradient(to top, #ff4500, #ff6b35, transparent);
       animation: flameSide 0.12s infinite alternate;
     }
 
     @keyframes flameMain {
+      0% { height: 100px; width: 50px; }
+      100% { height: 115px; width: 55px; }
+    }
+
+    @keyframes flameInner {
       0% { height: 70px; }
       100% { height: 85px; }
     }
 
     @keyframes flameSide {
-      0% { height: 40px; }
-      100% { height: 55px; }
-    }
-
-    @keyframes flicker {
-      0% { transform: translateX(-50%) scaleX(1); }
-      100% { transform: translateX(-50%) scaleX(1.1); }
+      0% { height: 60px; opacity: 0.8; }
+      100% { height: 75px; opacity: 1; }
     }
 
     /* ==================== STACKED EMOJIS ==================== */
@@ -299,19 +374,19 @@
       bottom: 0;
       left: 0;
       right: 0;
-      top: 0;
       display: flex;
       flex-direction: column-reverse;
       align-items: center;
       justify-content: flex-start;
-      padding: 5px;
+      gap: 2px;
     }
 
     .stacked-emoji {
-      font-size: 1.8rem;
+      font-size: 2rem;
       line-height: 1;
       animation: dropIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
+      flex-shrink: 0;
     }
 
     @keyframes dropIn {
@@ -320,11 +395,11 @@
         opacity: 0;
       }
       60% {
-        transform: translateY(5px) rotate(10deg);
+        transform: translateY(8px) rotate(15deg);
         opacity: 1;
       }
       80% {
-        transform: translateY(-3px) rotate(-5deg);
+        transform: translateY(-4px) rotate(-8deg);
       }
       100% {
         transform: translateY(0) rotate(0deg);
@@ -483,78 +558,57 @@
 
     /* Screen shake */
     .screen-shake {
-      animation: screenShake 0.6s ease-in-out;
+      animation: screenShake 0.8s ease-in-out;
     }
 
     @keyframes screenShake {
       0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      10% { transform: translate(-10px, -5px) rotate(-1deg); }
-      20% { transform: translate(10px, 5px) rotate(1deg); }
-      30% { transform: translate(-10px, 5px) rotate(-1deg); }
-      40% { transform: translate(10px, -5px) rotate(1deg); }
-      50% { transform: translate(-5px, 10px) rotate(-0.5deg); }
-      60% { transform: translate(5px, -10px) rotate(0.5deg); }
-      70% { transform: translate(-5px, -5px) rotate(-0.5deg); }
-      80% { transform: translate(5px, 5px) rotate(0.5deg); }
-      90% { transform: translate(-3px, 3px) rotate(0deg); }
+      10% { transform: translate(-12px, -6px) rotate(-1.5deg); }
+      20% { transform: translate(12px, 6px) rotate(1.5deg); }
+      30% { transform: translate(-12px, 6px) rotate(-1.5deg); }
+      40% { transform: translate(12px, -6px) rotate(1.5deg); }
+      50% { transform: translate(-8px, 10px) rotate(-1deg); }
+      60% { transform: translate(8px, -10px) rotate(1deg); }
+      70% { transform: translate(-6px, -6px) rotate(-0.5deg); }
+      80% { transform: translate(6px, 6px) rotate(0.5deg); }
+      90% { transform: translate(-4px, 4px) rotate(0deg); }
     }
 
     /* ==================== RESPONSIVE ==================== */
-    @media (min-height: 800px) {
-      .rocket-wrapper {
-        height: 400px;
-      }
-      .rocket {
-        width: 160px;
-        height: 340px;
-      }
-      .rocket-body {
-        width: 90px;
-        height: 230px;
-      }
-      .rocket-nose {
-        border-left-width: 45px;
-        border-right-width: 45px;
-        border-bottom-width: 70px;
-      }
-      .count-display {
-        font-size: 5rem;
-      }
-    }
-
-    @media (max-height: 650px) {
+    @media (max-height: 700px) {
       .container {
         gap: 8px;
       }
       .rocket-wrapper {
-        height: 280px;
+        height: 320px;
       }
       .rocket {
-        width: 120px;
-        height: 250px;
-      }
-      .rocket-body {
-        width: 70px;
-        height: 170px;
-      }
-      .rocket-nose {
-        border-left-width: 35px;
-        border-right-width: 35px;
-        border-bottom-width: 50px;
+        transform: scale(0.8);
+        transform-origin: bottom center;
       }
       .count-display {
-        font-size: 3rem;
-        min-height: 50px;
+        font-size: 3.5rem;
+        min-height: 60px;
       }
       .btn {
-        padding: 12px 10px;
-        font-size: 1.5rem;
+        padding: 14px 12px;
+        font-size: 1.6rem;
       }
       .btn-add {
         font-size: 2rem;
       }
-      .stacked-emoji {
-        font-size: 1.5rem;
+    }
+
+    @media (min-height: 900px) {
+      .rocket-wrapper {
+        height: 480px;
+      }
+      .rocket {
+        transform: scale(1.15);
+        transform-origin: bottom center;
+      }
+      .count-display {
+        font-size: 5.5rem;
       }
     }
 
@@ -583,18 +637,20 @@
     <div class="rocket-wrapper">
       <div class="rocket" id="rocket">
         <div class="rocket-nose"></div>
+        <div class="rocket-window"></div>
         <div class="rocket-body">
-          <div class="jar-area">
+          <div class="jar-area" id="jarArea">
             <div class="emoji-stack" id="emojiStack"></div>
           </div>
         </div>
         <div class="rocket-fin left"></div>
         <div class="rocket-fin right"></div>
-        <div class="rocket-base"></div>
+        <div class="rocket-engine"></div>
         <div class="flames" id="flames">
           <div class="flame main"></div>
-          <div class="flame left"></div>
-          <div class="flame right"></div>
+          <div class="flame inner"></div>
+          <div class="flame left-outer"></div>
+          <div class="flame right-outer"></div>
         </div>
       </div>
     </div>
@@ -609,7 +665,7 @@
 
   <script>
     /* ============================================================
-       ASTRONAUT JAR - Rocket Edition
+       ASTRONAUT JAR - Rocket Edition v2
        ============================================================ */
 
     // ==================== CONFIGURATION ====================
@@ -623,6 +679,7 @@
     // ==================== DOM ELEMENTS ====================
     const countDisplay = document.getElementById('countDisplay');
     const emojiStack = document.getElementById('emojiStack');
+    const jarArea = document.getElementById('jarArea');
     const rocket = document.getElementById('rocket');
     const flames = document.getElementById('flames');
     const mainContainer = document.getElementById('mainContainer');
@@ -641,7 +698,6 @@
     let isCelebrating = false;
 
     // ==================== AUDIO ====================
-    // Create audio context for sound effects
     let audioContext = null;
 
     function initAudio() {
@@ -660,7 +716,6 @@
       gainNode.connect(audioContext.destination);
 
       if (type === 'add') {
-        // Happy bloop sound
         oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1);
         gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
@@ -668,7 +723,6 @@
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.2);
       } else if (type === 'undo') {
-        // Sad bloop sound
         oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.15);
         gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
@@ -676,48 +730,45 @@
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.2);
       } else if (type === 'liftoff') {
-        // Rumbling liftoff sound
         const noise = audioContext.createOscillator();
         noise.type = 'sawtooth';
-        noise.frequency.setValueAtTime(80, audioContext.currentTime);
-        noise.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 1.5);
+        noise.frequency.setValueAtTime(60, audioContext.currentTime);
+        noise.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 2);
 
         const noiseGain = audioContext.createGain();
-        noiseGain.gain.setValueAtTime(0.4, audioContext.currentTime);
-        noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+        noiseGain.gain.setValueAtTime(0.5, audioContext.currentTime);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2.5);
 
         noise.connect(noiseGain);
         noiseGain.connect(audioContext.destination);
         noise.start(audioContext.currentTime);
-        noise.stop(audioContext.currentTime + 2);
+        noise.stop(audioContext.currentTime + 2.5);
 
-        // Add some higher frequency "whoosh"
         const whoosh = audioContext.createOscillator();
         whoosh.type = 'sine';
-        whoosh.frequency.setValueAtTime(300, audioContext.currentTime);
-        whoosh.frequency.exponentialRampToValueAtTime(1500, audioContext.currentTime + 1.5);
+        whoosh.frequency.setValueAtTime(200, audioContext.currentTime);
+        whoosh.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 2);
 
         const whooshGain = audioContext.createGain();
-        whooshGain.gain.setValueAtTime(0.2, audioContext.currentTime);
-        whooshGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+        whooshGain.gain.setValueAtTime(0.25, audioContext.currentTime);
+        whooshGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
 
         whoosh.connect(whooshGain);
         whooshGain.connect(audioContext.destination);
         whoosh.start(audioContext.currentTime);
-        whoosh.stop(audioContext.currentTime + 1.5);
+        whoosh.stop(audioContext.currentTime + 2);
       } else if (type === 'celebration') {
-        // Triumphant fanfare
-        const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+        const notes = [523, 659, 784, 1047];
         notes.forEach((freq, i) => {
           const osc = audioContext.createOscillator();
           const gain = audioContext.createGain();
           osc.connect(gain);
           gain.connect(audioContext.destination);
           osc.frequency.setValueAtTime(freq, audioContext.currentTime + i * 0.15);
-          gain.gain.setValueAtTime(0.2, audioContext.currentTime + i * 0.15);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.3);
+          gain.gain.setValueAtTime(0.25, audioContext.currentTime + i * 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.4);
           osc.start(audioContext.currentTime + i * 0.15);
-          osc.stop(audioContext.currentTime + i * 0.15 + 0.3);
+          osc.stop(audioContext.currentTime + i * 0.15 + 0.4);
         });
       }
     }
@@ -765,8 +816,8 @@
         span.className = 'stacked-emoji';
         span.textContent = emoji;
         // Random slight horizontal offset for natural pile look
-        const offset = (Math.random() - 0.5) * 15;
-        span.style.transform = `translateX(${offset}px)`;
+        const offset = (Math.random() - 0.5) * 20;
+        span.style.marginLeft = offset + 'px';
         // No animation for existing emojis on load
         if (index < emojis.length - 1 || !document.hasFocus()) {
           span.style.animation = 'none';
@@ -774,20 +825,32 @@
         emojiStack.appendChild(span);
       });
 
-      // Check if jar is full
-      checkIfFull();
+      // Check if jar is full after a short delay for rendering
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          checkIfFull();
+        });
+      });
     }
 
     function checkIfFull() {
-      if (isCelebrating) return;
+      if (isCelebrating || emojis.length === 0) return;
 
-      const jarArea = document.querySelector('.jar-area');
-      const stackHeight = emojiStack.scrollHeight;
-      const jarHeight = jarArea.clientHeight;
+      // Get the jar area boundaries
+      const jarRect = jarArea.getBoundingClientRect();
 
-      // If emojis overflow the jar, trigger celebration
-      if (stackHeight > jarHeight && emojis.length > 0) {
-        triggerCelebration();
+      // Get all emoji elements
+      const emojiElements = emojiStack.querySelectorAll('.stacked-emoji');
+      if (emojiElements.length === 0) return;
+
+      // Check if any emoji has gone above the jar area
+      for (const emojiEl of emojiElements) {
+        const emojiRect = emojiEl.getBoundingClientRect();
+        // If the top of any emoji is above the top of the jar area, celebrate!
+        if (emojiRect.top < jarRect.top) {
+          triggerCelebration();
+          return;
+        }
       }
     }
 
@@ -879,16 +942,16 @@
         spawnShootingStars();
         spawnConfetti();
         spawnCelebrationEmojis();
-      }, 1200);
+      }, 1400);
 
       // Reset after celebration
       setTimeout(() => {
         resetAfterCelebration();
-      }, 4000);
+      }, 4500);
     }
 
     function spawnShootingStars() {
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < 20; i++) {
         setTimeout(() => {
           const star = document.createElement('div');
           star.className = 'shooting-star';
@@ -898,45 +961,45 @@
           celebrationOverlay.appendChild(star);
 
           setTimeout(() => star.remove(), 1000);
-        }, i * 100);
+        }, i * 80);
       }
     }
 
     function spawnConfetti() {
-      const colors = ['#ff6b6b', '#ffd700', '#22c55e', '#4a9eff', '#ff69b4', '#9b59b6', '#f39c12'];
+      const colors = ['#ff6b6b', '#ffd700', '#22c55e', '#4a9eff', '#ff69b4', '#9b59b6', '#f39c12', '#00ff88'];
 
-      for (let i = 0; i < 80; i++) {
+      for (let i = 0; i < 100; i++) {
         setTimeout(() => {
           const confetti = document.createElement('div');
           confetti.className = 'confetti';
           confetti.style.left = Math.random() * 100 + '%';
           confetti.style.top = '-10px';
           confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-          confetti.style.width = (5 + Math.random() * 10) + 'px';
-          confetti.style.height = (5 + Math.random() * 10) + 'px';
+          confetti.style.width = (6 + Math.random() * 12) + 'px';
+          confetti.style.height = (6 + Math.random() * 12) + 'px';
           confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
           confetti.style.animation = `confettiFall ${2 + Math.random() * 2}s linear forwards`;
           celebrationOverlay.appendChild(confetti);
 
-          setTimeout(() => confetti.remove(), 4000);
-        }, i * 30);
+          setTimeout(() => confetti.remove(), 4500);
+        }, i * 25);
       }
     }
 
     function spawnCelebrationEmojis() {
-      const celebEmojis = ['🎉', '🌟', '⭐', '✨', '🎊', '🏆', '🥳'];
+      const celebEmojis = ['🎉', '🌟', '⭐', '✨', '🎊', '🏆', '🥳', '🚀', '💫'];
 
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 12; i++) {
         setTimeout(() => {
           const emoji = document.createElement('div');
           emoji.className = 'celebration-emoji';
           emoji.textContent = celebEmojis[Math.floor(Math.random() * celebEmojis.length)];
-          emoji.style.left = (20 + Math.random() * 60) + '%';
+          emoji.style.left = (10 + Math.random() * 80) + '%';
           emoji.style.top = (20 + Math.random() * 60) + '%';
           document.body.appendChild(emoji);
 
           setTimeout(() => emoji.remove(), 1000);
-        }, 500 + i * 150);
+        }, 400 + i * 120);
       }
     }
 
@@ -964,7 +1027,7 @@
     // ==================== STARS BACKGROUND ====================
 
     function createStars() {
-      const starCount = 80;
+      const starCount = 100;
       for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
         star.className = 'star';
