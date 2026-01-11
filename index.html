@@ -6,47 +6,30 @@
   <title>Astronaut Jar</title>
   <!--
     ============================================================
-    ASTRONAUT JAR - Customization Guide
+    ASTRONAUT JAR - Rocket Edition
     ============================================================
 
-    TITLE TEXT:
-    - Change the <title> tag above
-    - Change the .title content in the HTML body below (search for "Astronaut Jar")
-
-    COLORS:
-    - --bg-dark: Main background color
-    - --jar-bg: Jar background color
-    - --jar-border: Jar border/glow color
-    - --btn-add: "Add Astronaut" button color
-    - --btn-undo: "Undo" button color
-    - --btn-reset: "Reset" button color
-    - --text-light: Main text color
-    - --text-gold: Accent/count text color
-
-    LOCALSTORAGE KEY:
-    - Search for "STORAGE_KEY" in the JavaScript section
-    - Default is "astronautJarCount"
-
-    STATUS MESSAGES:
-    - Search for "STATUS MESSAGES" in the JavaScript section
-    - Modify MSG_ADD, MSG_UNDO, MSG_RESET as desired
+    CUSTOMIZATION:
+    - SPACE_EMOJIS: Array of emojis that can appear (in JS)
+    - STORAGE_KEY: localStorage key (in JS)
+    - Colors: CSS variables in :root
+    - Sound effects: Can be toggled on/off with the 🔊 button
     ============================================================
   -->
   <style>
     /* ==================== COLOR VARIABLES ==================== */
     :root {
       --bg-dark: #0a0a1a;
-      --jar-bg: rgba(20, 30, 60, 0.7);
-      --jar-border: #4a9eff;
+      --rocket-body: linear-gradient(135deg, #e8e8e8 0%, #c0c0c0 50%, #a8a8a8 100%);
+      --rocket-tip: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
+      --rocket-window: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+      --rocket-fin: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
       --btn-add: #22c55e;
-      --btn-add-hover: #16a34a;
       --btn-undo: #f59e0b;
-      --btn-undo-hover: #d97706;
       --btn-reset: #ef4444;
-      --btn-reset-hover: #dc2626;
+      --btn-sound: #8b5cf6;
       --text-light: #ffffff;
       --text-gold: #ffd700;
-      --star-color: #ffffff;
     }
 
     /* ==================== BASE STYLES ==================== */
@@ -70,8 +53,10 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 20px;
+      min-height: -webkit-fill-available;
+      padding: 15px;
       position: relative;
+      overflow: hidden;
     }
 
     /* ==================== STARS BACKGROUND ==================== */
@@ -88,7 +73,7 @@
 
     .star {
       position: absolute;
-      background: var(--star-color);
+      background: #ffffff;
       border-radius: 50%;
       animation: twinkle 2s infinite ease-in-out;
     }
@@ -103,109 +88,266 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
       width: 100%;
       max-width: 400px;
       z-index: 1;
     }
 
-    /* ==================== TITLE ==================== */
-    .title {
-      font-size: 2.5rem;
-      font-weight: bold;
-      text-align: center;
-      text-shadow: 0 0 20px rgba(74, 158, 255, 0.8),
-                   0 0 40px rgba(74, 158, 255, 0.4);
-      margin-bottom: 10px;
-    }
-
-    .title-emoji {
-      font-size: 2rem;
-    }
-
-    /* ==================== JAR ==================== */
-    .jar {
-      background: var(--jar-bg);
-      border: 4px solid var(--jar-border);
-      border-radius: 20px 20px 40px 40px;
-      padding: 30px 40px;
-      text-align: center;
-      position: relative;
-      box-shadow: 0 0 30px rgba(74, 158, 255, 0.4),
-                  inset 0 0 60px rgba(74, 158, 255, 0.1);
-      width: 100%;
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Jar lid */
-    .jar::before {
-      content: '';
-      position: absolute;
-      top: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 70%;
-      height: 20px;
-      background: linear-gradient(to bottom, #6b7280, #4b5563);
-      border-radius: 10px 10px 0 0;
-      border: 3px solid #9ca3af;
-    }
-
-    .count {
-      font-size: 6rem;
+    /* ==================== COUNT DISPLAY ==================== */
+    .count-display {
+      font-size: 4rem;
       font-weight: bold;
       color: var(--text-gold);
       text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-      line-height: 1;
+      min-height: 70px;
     }
 
-    .label {
-      font-size: 1.3rem;
-      color: var(--text-light);
-      opacity: 0.9;
-      margin-top: 10px;
+    /* ==================== ROCKET CONTAINER ==================== */
+    .rocket-wrapper {
+      position: relative;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      height: 350px;
     }
 
-    .astronaut-display {
-      font-size: 2rem;
-      margin-top: 10px;
+    .rocket {
+      position: relative;
+      width: 140px;
+      height: 300px;
+      transition: transform 0.1s ease;
     }
 
-    /* ==================== STATUS MESSAGE ==================== */
-    .status {
-      min-height: 30px;
-      font-size: 1.1rem;
-      color: var(--text-gold);
-      text-align: center;
+    .rocket.shake {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    .rocket.liftoff {
+      animation: liftoff 2s ease-in forwards;
+    }
+
+    @keyframes liftoff {
+      0% { transform: translateY(0); }
+      10% { transform: translateY(10px); }
+      100% { transform: translateY(-150vh); }
+    }
+
+    /* Rocket Nose Cone */
+    .rocket-nose {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 40px solid transparent;
+      border-right: 40px solid transparent;
+      border-bottom: 60px solid #ee5253;
+      z-index: 3;
+    }
+
+    .rocket-nose::after {
+      content: '';
+      position: absolute;
+      top: 35px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 20px;
+      background: var(--rocket-window);
+      border-radius: 50%;
+      border: 3px solid #5a9fd4;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    /* Rocket Body */
+    .rocket-body {
+      position: absolute;
+      top: 55px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 200px;
+      background: var(--rocket-body);
+      border-radius: 10px;
+      box-shadow: inset -10px 0 20px rgba(0,0,0,0.2);
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    /* Jar area inside rocket body */
+    .jar-area {
+      position: absolute;
+      bottom: 10px;
+      left: 5px;
+      right: 5px;
+      top: 30px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    /* Rocket Fins */
+    .rocket-fin {
+      position: absolute;
+      bottom: 20px;
+      width: 30px;
+      height: 60px;
+      background: var(--rocket-fin);
+      z-index: 1;
+    }
+
+    .rocket-fin.left {
+      left: 0;
+      border-radius: 50% 0 0 50%;
+      transform: skewY(-20deg);
+    }
+
+    .rocket-fin.right {
+      right: 0;
+      border-radius: 0 50% 50% 0;
+      transform: skewY(20deg);
+    }
+
+    /* Rocket Base */
+    .rocket-base {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 30px;
+      background: linear-gradient(to bottom, #666, #444);
+      border-radius: 0 0 10px 10px;
+      z-index: 2;
+    }
+
+    /* Flames */
+    .flames {
+      position: absolute;
+      bottom: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 80px;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      z-index: 0;
+      transition: opacity 0.2s ease;
     }
 
-    .status.show {
+    .flames.active {
       opacity: 1;
+      animation: flicker 0.1s infinite alternate;
+    }
+
+    .flame {
+      position: absolute;
+      bottom: 0;
+      border-radius: 50% 50% 50% 50%;
+    }
+
+    .flame.main {
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 70px;
+      background: linear-gradient(to top, #ff4500, #ff8c00, #ffd700);
+      animation: flameMain 0.15s infinite alternate;
+    }
+
+    .flame.left {
+      left: 5px;
+      width: 20px;
+      height: 40px;
+      background: linear-gradient(to top, #ff4500, #ff6b35);
+      animation: flameSide 0.1s infinite alternate;
+    }
+
+    .flame.right {
+      right: 5px;
+      width: 20px;
+      height: 40px;
+      background: linear-gradient(to top, #ff4500, #ff6b35);
+      animation: flameSide 0.12s infinite alternate;
+    }
+
+    @keyframes flameMain {
+      0% { height: 70px; }
+      100% { height: 85px; }
+    }
+
+    @keyframes flameSide {
+      0% { height: 40px; }
+      100% { height: 55px; }
+    }
+
+    @keyframes flicker {
+      0% { transform: translateX(-50%) scaleX(1); }
+      100% { transform: translateX(-50%) scaleX(1.1); }
+    }
+
+    /* ==================== STACKED EMOJIS ==================== */
+    .emoji-stack {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 5px;
+    }
+
+    .stacked-emoji {
+      font-size: 1.8rem;
+      line-height: 1;
+      animation: dropIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    @keyframes dropIn {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 0;
+      }
+      60% {
+        transform: translateY(5px) rotate(10deg);
+        opacity: 1;
+      }
+      80% {
+        transform: translateY(-3px) rotate(-5deg);
+      }
+      100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
     }
 
     /* ==================== BUTTONS ==================== */
     .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
       width: 100%;
     }
 
     .btn {
-      padding: 20px 30px;
-      font-size: 1.4rem;
+      padding: 18px 15px;
+      font-size: 2rem;
       font-weight: bold;
       border: none;
       border-radius: 15px;
       cursor: pointer;
       transition: transform 0.1s ease, box-shadow 0.2s ease;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
@@ -215,113 +357,211 @@
     }
 
     .btn-add {
+      grid-column: 1 / -1;
       background: var(--btn-add);
       color: white;
-      box-shadow: 0 6px 0 var(--btn-add-hover),
-                  0 8px 20px rgba(34, 197, 94, 0.4);
+      box-shadow: 0 6px 0 #16a34a, 0 8px 20px rgba(34, 197, 94, 0.4);
+      font-size: 2.5rem;
     }
 
     .btn-add:active {
-      box-shadow: 0 2px 0 var(--btn-add-hover),
-                  0 4px 10px rgba(34, 197, 94, 0.4);
+      box-shadow: 0 2px 0 #16a34a, 0 4px 10px rgba(34, 197, 94, 0.4);
     }
 
     .btn-undo {
       background: var(--btn-undo);
       color: white;
-      box-shadow: 0 6px 0 var(--btn-undo-hover),
-                  0 8px 20px rgba(245, 158, 11, 0.4);
+      box-shadow: 0 6px 0 #d97706, 0 8px 20px rgba(245, 158, 11, 0.4);
     }
 
     .btn-undo:active {
-      box-shadow: 0 2px 0 var(--btn-undo-hover),
-                  0 4px 10px rgba(245, 158, 11, 0.4);
+      box-shadow: 0 2px 0 #d97706, 0 4px 10px rgba(245, 158, 11, 0.4);
     }
 
     .btn-reset {
       background: var(--btn-reset);
       color: white;
-      box-shadow: 0 6px 0 var(--btn-reset-hover),
-                  0 8px 20px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 6px 0 #dc2626, 0 8px 20px rgba(239, 68, 68, 0.4);
     }
 
     .btn-reset:active {
-      box-shadow: 0 2px 0 var(--btn-reset-hover),
-                  0 4px 10px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 2px 0 #dc2626, 0 4px 10px rgba(239, 68, 68, 0.4);
     }
 
-    /* ==================== FLOATING ASTRONAUT ANIMATION ==================== */
-    .floating-astronaut {
+    .btn-sound {
       position: fixed;
-      font-size: 4rem;
-      pointer-events: none;
+      top: 15px;
+      right: 15px;
+      width: 50px;
+      height: 50px;
+      padding: 0;
+      background: var(--btn-sound);
+      border-radius: 50%;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 0 #7c3aed, 0 6px 15px rgba(139, 92, 246, 0.4);
       z-index: 100;
-      animation: floatToJar 1s ease-in forwards;
     }
 
-    @keyframes floatToJar {
+    .btn-sound.muted {
+      opacity: 0.5;
+    }
+
+    /* ==================== CELEBRATION EFFECTS ==================== */
+    .celebration-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+      overflow: hidden;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+    }
+
+    @keyframes confettiFall {
       0% {
+        transform: translateY(-10px) rotate(0deg);
         opacity: 1;
-        transform: scale(1) rotate(0deg);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1.3) rotate(180deg);
       }
       100% {
+        transform: translateY(100vh) rotate(720deg);
         opacity: 0;
-        transform: scale(0.3) rotate(360deg);
       }
     }
 
-    /* ==================== CELEBRATION EFFECT ==================== */
-    .jar.celebrate {
-      animation: celebrate 0.5s ease;
+    .shooting-star {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 0 10px 2px white, 0 0 20px 4px rgba(255,255,255,0.5);
+      opacity: 0;
     }
 
-    @keyframes celebrate {
-      0%, 100% { transform: scale(1); }
-      25% { transform: scale(1.05); }
-      50% { transform: scale(1.02); }
-      75% { transform: scale(1.04); }
+    @keyframes shootingStar {
+      0% {
+        transform: translateX(0) translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(300px) translateY(300px);
+        opacity: 0;
+      }
     }
 
-    /* ==================== RESPONSIVE ADJUSTMENTS ==================== */
-    @media (min-width: 768px) {
-      .title {
+    /* Big celebration emoji burst */
+    .celebration-emoji {
+      position: fixed;
+      font-size: 5rem;
+      pointer-events: none;
+      z-index: 60;
+      animation: celebEmoji 1s ease-out forwards;
+    }
+
+    @keyframes celebEmoji {
+      0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.5) rotate(180deg);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(2) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Screen shake */
+    .screen-shake {
+      animation: screenShake 0.6s ease-in-out;
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      10% { transform: translate(-10px, -5px) rotate(-1deg); }
+      20% { transform: translate(10px, 5px) rotate(1deg); }
+      30% { transform: translate(-10px, 5px) rotate(-1deg); }
+      40% { transform: translate(10px, -5px) rotate(1deg); }
+      50% { transform: translate(-5px, 10px) rotate(-0.5deg); }
+      60% { transform: translate(5px, -10px) rotate(0.5deg); }
+      70% { transform: translate(-5px, -5px) rotate(-0.5deg); }
+      80% { transform: translate(5px, 5px) rotate(0.5deg); }
+      90% { transform: translate(-3px, 3px) rotate(0deg); }
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (min-height: 800px) {
+      .rocket-wrapper {
+        height: 400px;
+      }
+      .rocket {
+        width: 160px;
+        height: 340px;
+      }
+      .rocket-body {
+        width: 90px;
+        height: 230px;
+      }
+      .rocket-nose {
+        border-left-width: 45px;
+        border-right-width: 45px;
+        border-bottom-width: 70px;
+      }
+      .count-display {
+        font-size: 5rem;
+      }
+    }
+
+    @media (max-height: 650px) {
+      .container {
+        gap: 8px;
+      }
+      .rocket-wrapper {
+        height: 280px;
+      }
+      .rocket {
+        width: 120px;
+        height: 250px;
+      }
+      .rocket-body {
+        width: 70px;
+        height: 170px;
+      }
+      .rocket-nose {
+        border-left-width: 35px;
+        border-right-width: 35px;
+        border-bottom-width: 50px;
+      }
+      .count-display {
         font-size: 3rem;
-      }
-      .count {
-        font-size: 8rem;
-      }
-      .jar {
-        padding: 40px 60px;
-        min-height: 250px;
+        min-height: 50px;
       }
       .btn {
-        padding: 25px 40px;
-        font-size: 1.6rem;
+        padding: 12px 10px;
+        font-size: 1.5rem;
       }
-    }
-
-    @media (max-height: 600px) {
-      .container {
-        gap: 10px;
-      }
-      .jar {
-        padding: 20px 30px;
-        min-height: 150px;
-      }
-      .count {
-        font-size: 4rem;
-      }
-      .title {
+      .btn-add {
         font-size: 2rem;
       }
-      .btn {
-        padding: 15px 25px;
-        font-size: 1.2rem;
+      .stacked-emoji {
+        font-size: 1.5rem;
       }
+    }
+
+    /* Disabled state for buttons during celebration */
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -329,184 +569,402 @@
   <!-- Stars Background -->
   <div class="stars" id="stars"></div>
 
-  <div class="container">
-    <!-- ==================== TITLE (Change text here) ==================== -->
-    <h1 class="title">
-      <span class="title-emoji">🚀</span> Astronaut Jar <span class="title-emoji">🌟</span>
-    </h1>
+  <!-- Celebration Overlay -->
+  <div class="celebration-overlay" id="celebrationOverlay"></div>
 
-    <!-- Jar Display -->
-    <div class="jar" id="jar">
-      <div class="count" id="count">0</div>
-      <div class="label">Astronauts earned</div>
-      <div class="astronaut-display">🧑‍🚀</div>
+  <!-- Sound Toggle -->
+  <button class="btn btn-sound" id="btnSound">🔊</button>
+
+  <div class="container" id="mainContainer">
+    <!-- Count Display -->
+    <div class="count-display" id="countDisplay">0</div>
+
+    <!-- Rocket -->
+    <div class="rocket-wrapper">
+      <div class="rocket" id="rocket">
+        <div class="rocket-nose"></div>
+        <div class="rocket-body">
+          <div class="jar-area">
+            <div class="emoji-stack" id="emojiStack"></div>
+          </div>
+        </div>
+        <div class="rocket-fin left"></div>
+        <div class="rocket-fin right"></div>
+        <div class="rocket-base"></div>
+        <div class="flames" id="flames">
+          <div class="flame main"></div>
+          <div class="flame left"></div>
+          <div class="flame right"></div>
+        </div>
+      </div>
     </div>
-
-    <!-- Status Message -->
-    <div class="status" id="status"></div>
 
     <!-- Buttons -->
     <div class="buttons">
-      <button class="btn btn-add" id="btnAdd">🧑‍🚀 + Add Astronaut</button>
-      <button class="btn btn-undo" id="btnUndo">↩️ Undo</button>
-      <button class="btn btn-reset" id="btnReset">🗑️ Reset Jar</button>
+      <button class="btn btn-add" id="btnAdd">🧑‍🚀 +</button>
+      <button class="btn btn-undo" id="btnUndo">↩️</button>
+      <button class="btn btn-reset" id="btnReset">🗑️</button>
     </div>
   </div>
 
   <script>
     /* ============================================================
-       ASTRONAUT JAR - JavaScript
+       ASTRONAUT JAR - Rocket Edition
        ============================================================ */
 
-    // ==================== LOCALSTORAGE KEY (Change here) ====================
+    // ==================== CONFIGURATION ====================
     const STORAGE_KEY = 'astronautJarCount';
+    const STORAGE_EMOJIS_KEY = 'astronautJarEmojis';
+    const STORAGE_SOUND_KEY = 'astronautJarSound';
 
-    // ==================== STATUS MESSAGES (Change here) ====================
-    const MSG_ADD = 'Nice choice! New astronaut added. 🎉';
-    const MSG_UNDO = 'Last astronaut removed. 😢';
-    const MSG_RESET = 'Jar reset. Start fresh! ✨';
-    const MSG_EMPTY = 'Jar is already empty!';
-    const MSG_RESET_CANCELLED = 'Reset cancelled.';
+    // Space emojis to randomly pick from
+    const SPACE_EMOJIS = ['🧑‍🚀', '👨‍🚀', '👩‍🚀', '👽', '🛸', '🌟', '⭐', '🪐', '🌙', '☄️', '🛰️', '🌍', '🚀'];
 
     // ==================== DOM ELEMENTS ====================
-    const countEl = document.getElementById('count');
-    const statusEl = document.getElementById('status');
-    const jarEl = document.getElementById('jar');
+    const countDisplay = document.getElementById('countDisplay');
+    const emojiStack = document.getElementById('emojiStack');
+    const rocket = document.getElementById('rocket');
+    const flames = document.getElementById('flames');
+    const mainContainer = document.getElementById('mainContainer');
+    const celebrationOverlay = document.getElementById('celebrationOverlay');
+    const starsEl = document.getElementById('stars');
+
     const btnAdd = document.getElementById('btnAdd');
     const btnUndo = document.getElementById('btnUndo');
     const btnReset = document.getElementById('btnReset');
-    const starsEl = document.getElementById('stars');
+    const btnSound = document.getElementById('btnSound');
 
     // ==================== STATE ====================
-    let astronautCount = 0;
-    let statusTimeout = null;
+    let count = 0;
+    let emojis = [];
+    let soundEnabled = true;
+    let isCelebrating = false;
+
+    // ==================== AUDIO ====================
+    // Create audio context for sound effects
+    let audioContext = null;
+
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled || !audioContext) return;
+
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      if (type === 'add') {
+        // Happy bloop sound
+        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.2);
+      } else if (type === 'undo') {
+        // Sad bloop sound
+        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.15);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.2);
+      } else if (type === 'liftoff') {
+        // Rumbling liftoff sound
+        const noise = audioContext.createOscillator();
+        noise.type = 'sawtooth';
+        noise.frequency.setValueAtTime(80, audioContext.currentTime);
+        noise.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 1.5);
+
+        const noiseGain = audioContext.createGain();
+        noiseGain.gain.setValueAtTime(0.4, audioContext.currentTime);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+
+        noise.connect(noiseGain);
+        noiseGain.connect(audioContext.destination);
+        noise.start(audioContext.currentTime);
+        noise.stop(audioContext.currentTime + 2);
+
+        // Add some higher frequency "whoosh"
+        const whoosh = audioContext.createOscillator();
+        whoosh.type = 'sine';
+        whoosh.frequency.setValueAtTime(300, audioContext.currentTime);
+        whoosh.frequency.exponentialRampToValueAtTime(1500, audioContext.currentTime + 1.5);
+
+        const whooshGain = audioContext.createGain();
+        whooshGain.gain.setValueAtTime(0.2, audioContext.currentTime);
+        whooshGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+
+        whoosh.connect(whooshGain);
+        whooshGain.connect(audioContext.destination);
+        whoosh.start(audioContext.currentTime);
+        whoosh.stop(audioContext.currentTime + 1.5);
+      } else if (type === 'celebration') {
+        // Triumphant fanfare
+        const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+        notes.forEach((freq, i) => {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          osc.frequency.setValueAtTime(freq, audioContext.currentTime + i * 0.15);
+          gain.gain.setValueAtTime(0.2, audioContext.currentTime + i * 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.3);
+          osc.start(audioContext.currentTime + i * 0.15);
+          osc.stop(audioContext.currentTime + i * 0.15 + 0.3);
+        });
+      }
+    }
 
     // ==================== FUNCTIONS ====================
 
-    // Load count from localStorage
-    function loadCount() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved !== null) {
-        const parsed = parseInt(saved, 10);
-        if (!isNaN(parsed) && parsed >= 0) {
-          astronautCount = parsed;
+    function loadState() {
+      const savedCount = localStorage.getItem(STORAGE_KEY);
+      const savedEmojis = localStorage.getItem(STORAGE_EMOJIS_KEY);
+      const savedSound = localStorage.getItem(STORAGE_SOUND_KEY);
+
+      if (savedCount !== null) {
+        count = parseInt(savedCount, 10) || 0;
+      }
+      if (savedEmojis !== null) {
+        try {
+          emojis = JSON.parse(savedEmojis) || [];
+        } catch (e) {
+          emojis = [];
         }
       }
+      if (savedSound !== null) {
+        soundEnabled = savedSound === 'true';
+      }
+
       updateDisplay();
+      updateSoundButton();
     }
 
-    // Save count to localStorage
-    function saveCount() {
-      localStorage.setItem(STORAGE_KEY, astronautCount.toString());
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, count.toString());
+      localStorage.setItem(STORAGE_EMOJIS_KEY, JSON.stringify(emojis));
+      localStorage.setItem(STORAGE_SOUND_KEY, soundEnabled.toString());
     }
 
-    // Update the display
     function updateDisplay() {
-      countEl.textContent = astronautCount;
+      countDisplay.textContent = count;
+      renderEmojis();
     }
 
-    // Show status message
-    function showStatus(message) {
-      if (statusTimeout) {
-        clearTimeout(statusTimeout);
-      }
-      statusEl.textContent = message;
-      statusEl.classList.add('show');
-      statusTimeout = setTimeout(() => {
-        statusEl.classList.remove('show');
-      }, 2500);
-    }
-
-    // Celebrate animation on jar
-    function celebrateJar() {
-      jarEl.classList.remove('celebrate');
-      // Trigger reflow to restart animation
-      void jarEl.offsetWidth;
-      jarEl.classList.add('celebrate');
-    }
-
-    // Create floating astronaut animation
-    function createFloatingAstronaut() {
-      const astronaut = document.createElement('div');
-      astronaut.className = 'floating-astronaut';
-      astronaut.textContent = '🧑‍🚀';
-
-      // Start from button position
-      const btnRect = btnAdd.getBoundingClientRect();
-      const jarRect = jarEl.getBoundingClientRect();
-
-      astronaut.style.left = (btnRect.left + btnRect.width / 2 - 30) + 'px';
-      astronaut.style.top = (btnRect.top) + 'px';
-
-      // Set end position for animation
-      const endX = jarRect.left + jarRect.width / 2 - 30;
-      const endY = jarRect.top + jarRect.height / 2 - 30;
-
-      astronaut.style.setProperty('--end-x', endX + 'px');
-      astronaut.style.setProperty('--end-y', endY + 'px');
-
-      document.body.appendChild(astronaut);
-
-      // Animate to jar center
-      astronaut.animate([
-        {
-          left: astronaut.style.left,
-          top: astronaut.style.top,
-          opacity: 1
-        },
-        {
-          left: endX + 'px',
-          top: endY + 'px',
-          opacity: 0
+    function renderEmojis() {
+      emojiStack.innerHTML = '';
+      emojis.forEach((emoji, index) => {
+        const span = document.createElement('span');
+        span.className = 'stacked-emoji';
+        span.textContent = emoji;
+        // Random slight horizontal offset for natural pile look
+        const offset = (Math.random() - 0.5) * 15;
+        span.style.transform = `translateX(${offset}px)`;
+        // No animation for existing emojis on load
+        if (index < emojis.length - 1 || !document.hasFocus()) {
+          span.style.animation = 'none';
         }
-      ], {
-        duration: 800,
-        easing: 'ease-in'
+        emojiStack.appendChild(span);
       });
 
-      // Remove after animation
-      setTimeout(() => {
-        astronaut.remove();
-      }, 800);
+      // Check if jar is full
+      checkIfFull();
     }
 
-    // Add astronaut
-    function addAstronaut() {
-      astronautCount++;
-      saveCount();
+    function checkIfFull() {
+      if (isCelebrating) return;
+
+      const jarArea = document.querySelector('.jar-area');
+      const stackHeight = emojiStack.scrollHeight;
+      const jarHeight = jarArea.clientHeight;
+
+      // If emojis overflow the jar, trigger celebration
+      if (stackHeight > jarHeight && emojis.length > 0) {
+        triggerCelebration();
+      }
+    }
+
+    function getRandomEmoji() {
+      return SPACE_EMOJIS[Math.floor(Math.random() * SPACE_EMOJIS.length)];
+    }
+
+    function addEmoji() {
+      if (isCelebrating) return;
+
+      initAudio();
+      const emoji = getRandomEmoji();
+      emojis.push(emoji);
+      count = emojis.length;
+      saveState();
       updateDisplay();
-      showStatus(MSG_ADD);
-      createFloatingAstronaut();
-      celebrateJar();
+      playSound('add');
     }
 
-    // Undo (remove last astronaut)
-    function undoAstronaut() {
-      if (astronautCount > 0) {
-        astronautCount--;
-        saveCount();
-        updateDisplay();
-        showStatus(MSG_UNDO);
-      } else {
-        showStatus(MSG_EMPTY);
-      }
+    function undoEmoji() {
+      if (isCelebrating || emojis.length === 0) return;
+
+      initAudio();
+      emojis.pop();
+      count = emojis.length;
+      saveState();
+      updateDisplay();
+      playSound('undo');
     }
 
-    // Reset jar
     function resetJar() {
-      if (confirm('Are you sure you want to reset the jar to 0?')) {
-        astronautCount = 0;
-        saveCount();
+      if (isCelebrating) return;
+
+      if (confirm('🗑️ Reset?')) {
+        emojis = [];
+        count = 0;
+        saveState();
         updateDisplay();
-        showStatus(MSG_RESET);
-      } else {
-        showStatus(MSG_RESET_CANCELLED);
       }
     }
 
-    // Create starry background
+    function toggleSound() {
+      initAudio();
+      soundEnabled = !soundEnabled;
+      updateSoundButton();
+      saveState();
+      if (soundEnabled) {
+        playSound('add');
+      }
+    }
+
+    function updateSoundButton() {
+      btnSound.textContent = soundEnabled ? '🔊' : '🔇';
+      btnSound.classList.toggle('muted', !soundEnabled);
+    }
+
+    function setButtonsDisabled(disabled) {
+      btnAdd.disabled = disabled;
+      btnUndo.disabled = disabled;
+      btnReset.disabled = disabled;
+    }
+
+    // ==================== CELEBRATION ====================
+
+    function triggerCelebration() {
+      isCelebrating = true;
+      setButtonsDisabled(true);
+
+      initAudio();
+      playSound('celebration');
+
+      // Start flames
+      flames.classList.add('active');
+
+      // Shake effect
+      setTimeout(() => {
+        mainContainer.classList.add('screen-shake');
+        rocket.classList.add('shake');
+        playSound('liftoff');
+      }, 500);
+
+      // Liftoff!
+      setTimeout(() => {
+        mainContainer.classList.remove('screen-shake');
+        rocket.classList.remove('shake');
+        rocket.classList.add('liftoff');
+
+        // Spawn shooting stars and confetti
+        spawnShootingStars();
+        spawnConfetti();
+        spawnCelebrationEmojis();
+      }, 1200);
+
+      // Reset after celebration
+      setTimeout(() => {
+        resetAfterCelebration();
+      }, 4000);
+    }
+
+    function spawnShootingStars() {
+      for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+          const star = document.createElement('div');
+          star.className = 'shooting-star';
+          star.style.left = Math.random() * 100 + '%';
+          star.style.top = Math.random() * 50 + '%';
+          star.style.animation = `shootingStar ${0.5 + Math.random() * 0.5}s linear forwards`;
+          celebrationOverlay.appendChild(star);
+
+          setTimeout(() => star.remove(), 1000);
+        }, i * 100);
+      }
+    }
+
+    function spawnConfetti() {
+      const colors = ['#ff6b6b', '#ffd700', '#22c55e', '#4a9eff', '#ff69b4', '#9b59b6', '#f39c12'];
+
+      for (let i = 0; i < 80; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.top = '-10px';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.width = (5 + Math.random() * 10) + 'px';
+          confetti.style.height = (5 + Math.random() * 10) + 'px';
+          confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+          confetti.style.animation = `confettiFall ${2 + Math.random() * 2}s linear forwards`;
+          celebrationOverlay.appendChild(confetti);
+
+          setTimeout(() => confetti.remove(), 4000);
+        }, i * 30);
+      }
+    }
+
+    function spawnCelebrationEmojis() {
+      const celebEmojis = ['🎉', '🌟', '⭐', '✨', '🎊', '🏆', '🥳'];
+
+      for (let i = 0; i < 10; i++) {
+        setTimeout(() => {
+          const emoji = document.createElement('div');
+          emoji.className = 'celebration-emoji';
+          emoji.textContent = celebEmojis[Math.floor(Math.random() * celebEmojis.length)];
+          emoji.style.left = (20 + Math.random() * 60) + '%';
+          emoji.style.top = (20 + Math.random() * 60) + '%';
+          document.body.appendChild(emoji);
+
+          setTimeout(() => emoji.remove(), 1000);
+        }, 500 + i * 150);
+      }
+    }
+
+    function resetAfterCelebration() {
+      // Clear everything
+      emojis = [];
+      count = 0;
+      saveState();
+
+      // Reset rocket position
+      rocket.classList.remove('liftoff');
+      flames.classList.remove('active');
+
+      // Clear overlay
+      celebrationOverlay.innerHTML = '';
+
+      // Update display
+      updateDisplay();
+
+      // Re-enable buttons
+      isCelebrating = false;
+      setButtonsDisabled(false);
+    }
+
+    // ==================== STARS BACKGROUND ====================
+
     function createStars() {
-      const starCount = 100;
+      const starCount = 80;
       for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
         star.className = 'star';
@@ -521,13 +979,14 @@
     }
 
     // ==================== EVENT LISTENERS ====================
-    btnAdd.addEventListener('click', addAstronaut);
-    btnUndo.addEventListener('click', undoAstronaut);
+    btnAdd.addEventListener('click', addEmoji);
+    btnUndo.addEventListener('click', undoEmoji);
     btnReset.addEventListener('click', resetJar);
+    btnSound.addEventListener('click', toggleSound);
 
     // ==================== INITIALIZATION ====================
     createStars();
-    loadCount();
+    loadState();
   </script>
 </body>
 </html>
