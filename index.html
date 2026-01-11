@@ -627,7 +627,7 @@
   <div class="celebration-overlay" id="celebrationOverlay"></div>
 
   <!-- Sound Toggle -->
-  <button class="btn btn-sound" id="btnSound">🔊</button>
+  <button type="button" class="btn btn-sound" id="btnSound">🔊</button>
 
   <div class="container" id="mainContainer">
     <!-- Count Display -->
@@ -657,9 +657,9 @@
 
     <!-- Buttons -->
     <div class="buttons">
-      <button class="btn btn-add" id="btnAdd">🧑‍🚀 +</button>
-      <button class="btn btn-undo" id="btnUndo">↩️</button>
-      <button class="btn btn-reset" id="btnReset">🗑️</button>
+      <button type="button" class="btn btn-add" id="btnAdd">🧑‍🚀 +</button>
+      <button type="button" class="btn btn-undo" id="btnUndo">↩️</button>
+      <button type="button" class="btn btn-reset" id="btnReset">🗑️</button>
     </div>
   </div>
 
@@ -697,6 +697,7 @@
     let soundEnabled = true;
     let isCelebrating = false;
     let justAddedEmoji = false; // Track if user just added an emoji
+    let isProcessing = false; // Debounce flag to prevent rapid taps
 
     // ==================== AUDIO ====================
     let audioContext = null;
@@ -865,20 +866,29 @@
     }
 
     function addEmoji() {
-      if (isCelebrating) return;
+      // Guard against rapid taps and celebration state
+      if (isCelebrating || isProcessing) return;
+      isProcessing = true;
 
       initAudio();
       const emoji = getRandomEmoji();
       emojis.push(emoji);
       count = emojis.length;
-      justAddedEmoji = true; // Mark that user added an emoji
+      justAddedEmoji = true;
       saveState();
       updateDisplay();
       playSound('add');
+
+      // Release lock after animation completes
+      setTimeout(() => {
+        isProcessing = false;
+      }, 150);
     }
 
     function undoEmoji() {
-      if (isCelebrating || emojis.length === 0) return;
+      // Guard against rapid taps, celebration, and empty state
+      if (isCelebrating || isProcessing || emojis.length === 0) return;
+      isProcessing = true;
 
       initAudio();
       emojis.pop();
@@ -886,16 +896,26 @@
       saveState();
       updateDisplay();
       playSound('undo');
+
+      // Release lock
+      setTimeout(() => {
+        isProcessing = false;
+      }, 150);
     }
 
     function resetJar() {
-      if (isCelebrating) return;
+      // Guard against celebration and processing states
+      if (isCelebrating || isProcessing) return;
 
       if (confirm('🗑️ Reset?')) {
+        isProcessing = true;
         emojis = [];
         count = 0;
         saveState();
         updateDisplay();
+        setTimeout(() => {
+          isProcessing = false;
+        }, 150);
       }
     }
 
@@ -1058,9 +1078,10 @@
     createStars();
     loadState();
 
-    // Ensure buttons are enabled on page load (in case of stuck state)
+    // Ensure clean state on page load (in case of stuck state)
     setButtonsDisabled(false);
     isCelebrating = false;
+    isProcessing = false;
   </script>
 </body>
 </html>
