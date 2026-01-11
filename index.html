@@ -696,6 +696,7 @@
     let emojis = [];
     let soundEnabled = true;
     let isCelebrating = false;
+    let justAddedEmoji = false; // Track if user just added an emoji
 
     // ==================== AUDIO ====================
     let audioContext = null;
@@ -834,7 +835,12 @@
     }
 
     function checkIfFull() {
-      if (isCelebrating || emojis.length === 0) return;
+      // Only check for celebration if user just added an emoji (not on page load)
+      if (isCelebrating || emojis.length === 0 || !justAddedEmoji) {
+        justAddedEmoji = false;
+        return;
+      }
+      justAddedEmoji = false;
 
       // Get the jar area boundaries
       const jarRect = jarArea.getBoundingClientRect();
@@ -865,6 +871,7 @@
       const emoji = getRandomEmoji();
       emojis.push(emoji);
       count = emojis.length;
+      justAddedEmoji = true; // Mark that user added an emoji
       saveState();
       updateDisplay();
       playSound('add');
@@ -1050,6 +1057,10 @@
     // ==================== INITIALIZATION ====================
     createStars();
     loadState();
+
+    // Ensure buttons are enabled on page load (in case of stuck state)
+    setButtonsDisabled(false);
+    isCelebrating = false;
   </script>
 </body>
 </html>
