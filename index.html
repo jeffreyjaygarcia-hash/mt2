@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Astronaut Jar</title>
+  <!--
+    ============================================================
+    ASTRONAUT JAR - Rocket Edition v2
+    ============================================================
+
+    CUSTOMIZATION:
+    - SPACE_EMOJIS: Array of emojis that can appear (in JS)
+    - STORAGE_KEY: localStorage key (in JS)
+    - Colors: CSS variables in :root
+    - Sound effects: Can be toggled on/off with the 🔊 button
+    ============================================================
+  -->
+  <style>
+    /* ==================== COLOR VARIABLES ==================== */
+    :root {
+      --bg-dark: #0b0b2a;
+      --bg-gradient: linear-gradient(180deg, #0b0b2a 0%, #1a1a4a 50%, #2d1b4e 100%);
+      --btn-add: #22c55e;
+      --btn-undo: #f59e0b;
+      --btn-reset: #ef4444;
+      --btn-sound: #8b5cf6;
+      --text-light: #ffffff;
+      --text-gold: #ffd700;
+    }
+
+    /* ==================== BASE STYLES ==================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      padding: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ==================== STARS BACKGROUND ==================== */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: #ffffff;
+      border-radius: 50%;
+      animation: twinkle 2s infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* ==================== MAIN CONTAINER ==================== */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 400px;
+      z-index: 1;
+    }
+
+    /* ==================== COUNT DISPLAY ==================== */
+    .count-display {
+      font-size: 4.5rem;
+      font-weight: bold;
+      color: var(--text-gold);
+      text-shadow: 0 0 30px rgba(255, 215, 0, 0.6),
+                   0 4px 8px rgba(0,0,0,0.5);
+      min-height: 80px;
+      line-height: 1;
+    }
+
+    /* ==================== ROCKET CONTAINER ==================== */
+    .rocket-wrapper {
+      position: relative;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      height: 420px;
+    }
+
+    .rocket {
+      position: relative;
+      width: 180px;
+      height: 380px;
+      transition: transform 0.1s ease;
+    }
+
+    .rocket.shake {
+      animation: shake 0.6s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0) translateY(0); }
+      10% { transform: translateX(-8px) translateY(-2px); }
+      20% { transform: translateX(8px) translateY(2px); }
+      30% { transform: translateX(-8px) translateY(-1px); }
+      40% { transform: translateX(8px) translateY(1px); }
+      50% { transform: translateX(-6px) translateY(-2px); }
+      60% { transform: translateX(6px) translateY(2px); }
+      70% { transform: translateX(-4px) translateY(-1px); }
+      80% { transform: translateX(4px) translateY(1px); }
+      90% { transform: translateX(-2px) translateY(0); }
+    }
+
+    .rocket.liftoff {
+      animation: liftoff 2.5s ease-in forwards;
+    }
+
+    @keyframes liftoff {
+      0% { transform: translateY(0); }
+      5% { transform: translateY(5px); }
+      15% { transform: translateY(0); }
+      100% { transform: translateY(-200vh) rotate(5deg); }
+    }
+
+    /* ==================== ROCKET DESIGN ==================== */
+
+    /* Nose Cone - Red pointed tip */
+    .rocket-nose {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 80px;
+      background: linear-gradient(135deg, #ff4444 0%, #cc0000 50%, #aa0000 100%);
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+      box-shadow: inset -15px 0 30px rgba(0,0,0,0.3),
+                  inset 10px 0 20px rgba(255,255,255,0.2);
+      z-index: 3;
+    }
+
+    /* Porthole Window */
+    .rocket-window {
+      position: absolute;
+      top: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, #87CEEB 0%, #4A90D9 50%, #2E5A8B 100%);
+      border-radius: 50%;
+      border: 5px solid #888;
+      box-shadow: inset 0 0 20px rgba(255,255,255,0.5),
+                  0 0 10px rgba(0,0,0,0.5),
+                  inset -5px -5px 15px rgba(0,0,0,0.3);
+      z-index: 4;
+    }
+
+    .rocket-window::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 12px;
+      height: 12px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 50%;
+    }
+
+    /* Rocket Body - Silver/White main body */
+    .rocket-body {
+      position: absolute;
+      top: 75px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 240px;
+      background: linear-gradient(90deg,
+        #a0a0a0 0%,
+        #d0d0d0 15%,
+        #f5f5f5 30%,
+        #ffffff 50%,
+        #f5f5f5 70%,
+        #d0d0d0 85%,
+        #a0a0a0 100%);
+      border-radius: 5px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    /* Jar area inside rocket body */
+    .jar-area {
+      position: absolute;
+      bottom: 45px;
+      left: 8px;
+      right: 8px;
+      top: 5px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    /* Body stripes/details */
+    .rocket-body::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(90deg,
+        #666 0%,
+        #888 15%,
+        #999 50%,
+        #888 85%,
+        #666 100%);
+    }
+
+    /* Rocket Fins - More realistic angled fins */
+    .rocket-fin {
+      position: absolute;
+      bottom: 10px;
+      width: 45px;
+      height: 90px;
+      z-index: 1;
+    }
+
+    .rocket-fin.left {
+      left: -5px;
+      background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+      clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 40% 0%);
+      box-shadow: -3px 3px 10px rgba(0,0,0,0.4);
+    }
+
+    .rocket-fin.right {
+      right: -5px;
+      background: linear-gradient(225deg, #ff4444 0%, #cc0000 100%);
+      clip-path: polygon(0% 0%, 0% 100%, 100% 100%, 60% 0%);
+      box-shadow: 3px 3px 10px rgba(0,0,0,0.4);
+    }
+
+    /* Engine/Thruster */
+    .rocket-engine {
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 35px;
+      background: linear-gradient(to bottom, #555, #333, #222);
+      border-radius: 5px 5px 15px 15px;
+      z-index: 2;
+    }
+
+    .rocket-engine::before {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 25px;
+      background: linear-gradient(to bottom, #222, #111);
+      border-radius: 3px 3px 10px 10px;
+    }
+
+    /* Flames */
+    .flames {
+      position: absolute;
+      bottom: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 120px;
+      opacity: 0;
+      z-index: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .flames.active {
+      opacity: 1;
+    }
+
+    .flame {
+      position: absolute;
+      bottom: 0;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    }
+
+    .flame.main {
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 100px;
+      background: linear-gradient(to top,
+        rgba(255,69,0,0.9) 0%,
+        rgba(255,140,0,0.9) 30%,
+        rgba(255,200,0,0.9) 60%,
+        rgba(255,255,200,0.9) 100%);
+      animation: flameMain 0.08s infinite alternate;
+    }
+
+    .flame.inner {
+      left: 50%;
+      transform: translateX(-50%);
+      width: 25px;
+      height: 70px;
+      background: linear-gradient(to top,
+        rgba(255,200,100,1) 0%,
+        rgba(255,255,200,1) 50%,
+        rgba(255,255,255,0.9) 100%);
+      animation: flameInner 0.06s infinite alternate;
+    }
+
+    .flame.left-outer {
+      left: 5px;
+      width: 25px;
+      height: 60px;
+      background: linear-gradient(to top, #ff4500, #ff6b35, transparent);
+      animation: flameSide 0.1s infinite alternate;
+    }
+
+    .flame.right-outer {
+      right: 5px;
+      width: 25px;
+      height: 60px;
+      background: linear-gradient(to top, #ff4500, #ff6b35, transparent);
+      animation: flameSide 0.12s infinite alternate;
+    }
+
+    @keyframes flameMain {
+      0% { height: 100px; width: 50px; }
+      100% { height: 115px; width: 55px; }
+    }
+
+    @keyframes flameInner {
+      0% { height: 70px; }
+      100% { height: 85px; }
+    }
+
+    @keyframes flameSide {
+      0% { height: 60px; opacity: 0.8; }
+      100% { height: 75px; opacity: 1; }
+    }
+
+    /* ==================== STACKED EMOJIS ==================== */
+    .emoji-stack {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 2px;
+    }
+
+    .stacked-emoji {
+      font-size: 1.7rem;
+      line-height: 1;
+      animation: dropIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    @keyframes dropIn {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 0;
+      }
+      60% {
+        transform: translateY(8px) rotate(15deg);
+        opacity: 1;
+      }
+      80% {
+        transform: translateY(-4px) rotate(-8deg);
+      }
+      100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .btn {
+      padding: 18px 15px;
+      font-size: 2rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-add {
+      grid-column: 1 / -1;
+      background: var(--btn-add);
+      color: white;
+      box-shadow: 0 6px 0 #16a34a, 0 8px 20px rgba(34, 197, 94, 0.4);
+      font-size: 2.5rem;
+    }
+
+    .btn-add:active {
+      box-shadow: 0 2px 0 #16a34a, 0 4px 10px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-undo {
+      background: var(--btn-undo);
+      color: white;
+      box-shadow: 0 6px 0 #d97706, 0 8px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-undo:active {
+      box-shadow: 0 2px 0 #d97706, 0 4px 10px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-reset {
+      background: var(--btn-reset);
+      color: white;
+      box-shadow: 0 6px 0 #dc2626, 0 8px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-reset:active {
+      box-shadow: 0 2px 0 #dc2626, 0 4px 10px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-sound {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      width: 50px;
+      height: 50px;
+      padding: 0;
+      background: var(--btn-sound);
+      border-radius: 50%;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 0 #7c3aed, 0 6px 15px rgba(139, 92, 246, 0.4);
+      z-index: 100;
+    }
+
+    .btn-sound.muted {
+      opacity: 0.5;
+    }
+
+    /* ==================== CELEBRATION EFFECTS ==================== */
+    .celebration-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+      overflow: hidden;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-10px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    .shooting-star {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 0 10px 2px white, 0 0 20px 4px rgba(255,255,255,0.5);
+      opacity: 0;
+    }
+
+    @keyframes shootingStar {
+      0% {
+        transform: translateX(0) translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(300px) translateY(300px);
+        opacity: 0;
+      }
+    }
+
+    /* Big celebration emoji burst */
+    .celebration-emoji {
+      position: fixed;
+      font-size: 5rem;
+      pointer-events: none;
+      z-index: 60;
+      animation: celebEmoji 1s ease-out forwards;
+    }
+
+    @keyframes celebEmoji {
+      0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.5) rotate(180deg);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(2) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Screen shake */
+    .screen-shake {
+      animation: screenShake 0.8s ease-in-out;
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      10% { transform: translate(-12px, -6px) rotate(-1.5deg); }
+      20% { transform: translate(12px, 6px) rotate(1.5deg); }
+      30% { transform: translate(-12px, 6px) rotate(-1.5deg); }
+      40% { transform: translate(12px, -6px) rotate(1.5deg); }
+      50% { transform: translate(-8px, 10px) rotate(-1deg); }
+      60% { transform: translate(8px, -10px) rotate(1deg); }
+      70% { transform: translate(-6px, -6px) rotate(-0.5deg); }
+      80% { transform: translate(6px, 6px) rotate(0.5deg); }
+      90% { transform: translate(-4px, 4px) rotate(0deg); }
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-height: 700px) {
+      .container {
+        gap: 8px;
+      }
+      .rocket-wrapper {
+        height: 320px;
+      }
+      .rocket {
+        transform: scale(0.8);
+        transform-origin: bottom center;
+      }
+      .count-display {
+        font-size: 3.5rem;
+        min-height: 60px;
+      }
+      .btn {
+        padding: 14px 12px;
+        font-size: 1.6rem;
+      }
+      .btn-add {
+        font-size: 2rem;
+      }
+    }
+
+    @media (min-height: 900px) {
+      .rocket-wrapper {
+        height: 480px;
+      }
+      .rocket {
+        transform: scale(1.15);
+        transform-origin: bottom center;
+      }
+      .count-display {
+        font-size: 5.5rem;
+      }
+    }
+
+    /* Disabled state for buttons during celebration */
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <!-- Stars Background -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Celebration Overlay -->
+  <div class="celebration-overlay" id="celebrationOverlay"></div>
+
+  <!-- Sound Toggle -->
+  <button class="btn btn-sound" id="btnSound">🔊</button>
+
+  <div class="container" id="mainContainer">
+    <!-- Count Display -->
+    <div class="count-display" id="countDisplay">0</div>
+
+    <!-- Rocket -->
+    <div class="rocket-wrapper">
+      <div class="rocket" id="rocket">
+        <div class="rocket-nose"></div>
+        <div class="rocket-window"></div>
+        <div class="rocket-body">
+          <div class="jar-area" id="jarArea">
+            <div class="emoji-stack" id="emojiStack"></div>
+          </div>
+        </div>
+        <div class="rocket-fin left"></div>
+        <div class="rocket-fin right"></div>
+        <div class="rocket-engine"></div>
+        <div class="flames" id="flames">
+          <div class="flame main"></div>
+          <div class="flame inner"></div>
+          <div class="flame left-outer"></div>
+          <div class="flame right-outer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button class="btn btn-add" id="btnAdd">🧑‍🚀 +</button>
+      <button class="btn btn-undo" id="btnUndo">↩️</button>
+      <button class="btn btn-reset" id="btnReset">🗑️</button>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       ASTRONAUT JAR - Rocket Edition v2
+       ============================================================ */
+
+    // ==================== CONFIGURATION ====================
+    const STORAGE_KEY = 'astronautJarCount';
+    const STORAGE_EMOJIS_KEY = 'astronautJarEmojis';
+    const STORAGE_SOUND_KEY = 'astronautJarSound';
+
+    // Space emojis to randomly pick from
+    const SPACE_EMOJIS = ['🧑‍🚀', '👨‍🚀', '👩‍🚀', '👽', '🛸', '🌟', '⭐', '🪐', '🌙', '☄️', '🛰️', '🌍', '🚀'];
+
+    // ==================== DOM ELEMENTS ====================
+    const countDisplay = document.getElementById('countDisplay');
+    const emojiStack = document.getElementById('emojiStack');
+    const jarArea = document.getElementById('jarArea');
+    const rocket = document.getElementById('rocket');
+    const flames = document.getElementById('flames');
+    const mainContainer = document.getElementById('mainContainer');
+    const celebrationOverlay = document.getElementById('celebrationOverlay');
+    const starsEl = document.getElementById('stars');
+
+    const btnAdd = document.getElementById('btnAdd');
+    const btnUndo = document.getElementById('btnUndo');
+    const btnReset = document.getElementById('btnReset');
+    const btnSound = document.getElementById('btnSound');
+
+    // ==================== STATE ====================
+    let count = 0;
+    let emojis = [];
+    let soundEnabled = true;
+    let isCelebrating = false;
+    let justAddedEmoji = false; // Track if user just added an emoji
+
+    // ==================== AUDIO ====================
+    let audioContext = null;
+
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled || !audioContext) return;
+
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      if (type === 'add') {
+        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.2);
+      } else if (type === 'undo') {
+        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.15);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.2);
+      } else if (type === 'liftoff') {
+        const noise = audioContext.createOscillator();
+        noise.type = 'sawtooth';
+        noise.frequency.setValueAtTime(60, audioContext.currentTime);
+        noise.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 2);
+
+        const noiseGain = audioContext.createGain();
+        noiseGain.gain.setValueAtTime(0.5, audioContext.currentTime);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2.5);
+
+        noise.connect(noiseGain);
+        noiseGain.connect(audioContext.destination);
+        noise.start(audioContext.currentTime);
+        noise.stop(audioContext.currentTime + 2.5);
+
+        const whoosh = audioContext.createOscillator();
+        whoosh.type = 'sine';
+        whoosh.frequency.setValueAtTime(200, audioContext.currentTime);
+        whoosh.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 2);
+
+        const whooshGain = audioContext.createGain();
+        whooshGain.gain.setValueAtTime(0.25, audioContext.currentTime);
+        whooshGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+
+        whoosh.connect(whooshGain);
+        whooshGain.connect(audioContext.destination);
+        whoosh.start(audioContext.currentTime);
+        whoosh.stop(audioContext.currentTime + 2);
+      } else if (type === 'celebration') {
+        const notes = [523, 659, 784, 1047];
+        notes.forEach((freq, i) => {
+          const osc = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          osc.connect(gain);
+          gain.connect(audioContext.destination);
+          osc.frequency.setValueAtTime(freq, audioContext.currentTime + i * 0.15);
+          gain.gain.setValueAtTime(0.25, audioContext.currentTime + i * 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.4);
+          osc.start(audioContext.currentTime + i * 0.15);
+          osc.stop(audioContext.currentTime + i * 0.15 + 0.4);
+        });
+      }
+    }
+
+    // ==================== FUNCTIONS ====================
+
+    function loadState() {
+      const savedCount = localStorage.getItem(STORAGE_KEY);
+      const savedEmojis = localStorage.getItem(STORAGE_EMOJIS_KEY);
+      const savedSound = localStorage.getItem(STORAGE_SOUND_KEY);
+
+      if (savedCount !== null) {
+        count = parseInt(savedCount, 10) || 0;
+      }
+      if (savedEmojis !== null) {
+        try {
+          emojis = JSON.parse(savedEmojis) || [];
+        } catch (e) {
+          emojis = [];
+        }
+      }
+      if (savedSound !== null) {
+        soundEnabled = savedSound === 'true';
+      }
+
+      updateDisplay();
+      updateSoundButton();
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, count.toString());
+      localStorage.setItem(STORAGE_EMOJIS_KEY, JSON.stringify(emojis));
+      localStorage.setItem(STORAGE_SOUND_KEY, soundEnabled.toString());
+    }
+
+    function updateDisplay() {
+      countDisplay.textContent = count;
+      renderEmojis();
+    }
+
+    function renderEmojis() {
+      emojiStack.innerHTML = '';
+      emojis.forEach((emoji, index) => {
+        const span = document.createElement('span');
+        span.className = 'stacked-emoji';
+        span.textContent = emoji;
+        // Random slight horizontal offset for natural pile look
+        const offset = (Math.random() - 0.5) * 20;
+        span.style.marginLeft = offset + 'px';
+        // No animation for existing emojis on load
+        if (index < emojis.length - 1 || !document.hasFocus()) {
+          span.style.animation = 'none';
+        }
+        emojiStack.appendChild(span);
+      });
+
+      // Check if jar is full after a short delay for rendering
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          checkIfFull();
+        });
+      });
+    }
+
+    function checkIfFull() {
+      // Only check for celebration if user just added an emoji (not on page load)
+      if (isCelebrating || emojis.length === 0 || !justAddedEmoji) {
+        justAddedEmoji = false;
+        return;
+      }
+      justAddedEmoji = false;
+
+      // Get the jar area boundaries
+      const jarRect = jarArea.getBoundingClientRect();
+
+      // Get all emoji elements
+      const emojiElements = emojiStack.querySelectorAll('.stacked-emoji');
+      if (emojiElements.length === 0) return;
+
+      // Check if any emoji has gone above the jar area
+      for (const emojiEl of emojiElements) {
+        const emojiRect = emojiEl.getBoundingClientRect();
+        // If the top of any emoji is above the top of the jar area, celebrate!
+        if (emojiRect.top < jarRect.top) {
+          triggerCelebration();
+          return;
+        }
+      }
+    }
+
+    function getRandomEmoji() {
+      return SPACE_EMOJIS[Math.floor(Math.random() * SPACE_EMOJIS.length)];
+    }
+
+    function addEmoji() {
+      if (isCelebrating) return;
+
+      initAudio();
+      const emoji = getRandomEmoji();
+      emojis.push(emoji);
+      count = emojis.length;
+      justAddedEmoji = true; // Mark that user added an emoji
+      saveState();
+      updateDisplay();
+      playSound('add');
+    }
+
+    function undoEmoji() {
+      if (isCelebrating || emojis.length === 0) return;
+
+      initAudio();
+      emojis.pop();
+      count = emojis.length;
+      saveState();
+      updateDisplay();
+      playSound('undo');
+    }
+
+    function resetJar() {
+      if (isCelebrating) return;
+
+      if (confirm('🗑️ Reset?')) {
+        emojis = [];
+        count = 0;
+        saveState();
+        updateDisplay();
+      }
+    }
+
+    function toggleSound() {
+      initAudio();
+      soundEnabled = !soundEnabled;
+      updateSoundButton();
+      saveState();
+      if (soundEnabled) {
+        playSound('add');
+      }
+    }
+
+    function updateSoundButton() {
+      btnSound.textContent = soundEnabled ? '🔊' : '🔇';
+      btnSound.classList.toggle('muted', !soundEnabled);
+    }
+
+    function setButtonsDisabled(disabled) {
+      btnAdd.disabled = disabled;
+      btnUndo.disabled = disabled;
+      btnReset.disabled = disabled;
+    }
+
+    // ==================== CELEBRATION ====================
+
+    function triggerCelebration() {
+      isCelebrating = true;
+      setButtonsDisabled(true);
+
+      initAudio();
+      playSound('celebration');
+
+      // Start flames
+      flames.classList.add('active');
+
+      // Shake effect
+      setTimeout(() => {
+        mainContainer.classList.add('screen-shake');
+        rocket.classList.add('shake');
+        playSound('liftoff');
+      }, 500);
+
+      // Liftoff!
+      setTimeout(() => {
+        mainContainer.classList.remove('screen-shake');
+        rocket.classList.remove('shake');
+        rocket.classList.add('liftoff');
+
+        // Spawn shooting stars and confetti
+        spawnShootingStars();
+        spawnConfetti();
+        spawnCelebrationEmojis();
+      }, 1400);
+
+      // Reset after celebration
+      setTimeout(() => {
+        resetAfterCelebration();
+      }, 4500);
+    }
+
+    function spawnShootingStars() {
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+          const star = document.createElement('div');
+          star.className = 'shooting-star';
+          star.style.left = Math.random() * 100 + '%';
+          star.style.top = Math.random() * 50 + '%';
+          star.style.animation = `shootingStar ${0.5 + Math.random() * 0.5}s linear forwards`;
+          celebrationOverlay.appendChild(star);
+
+          setTimeout(() => star.remove(), 1000);
+        }, i * 80);
+      }
+    }
+
+    function spawnConfetti() {
+      const colors = ['#ff6b6b', '#ffd700', '#22c55e', '#4a9eff', '#ff69b4', '#9b59b6', '#f39c12', '#00ff88'];
+
+      for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.top = '-10px';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.width = (6 + Math.random() * 12) + 'px';
+          confetti.style.height = (6 + Math.random() * 12) + 'px';
+          confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+          confetti.style.animation = `confettiFall ${2 + Math.random() * 2}s linear forwards`;
+          celebrationOverlay.appendChild(confetti);
+
+          setTimeout(() => confetti.remove(), 4500);
+        }, i * 25);
+      }
+    }
+
+    function spawnCelebrationEmojis() {
+      const celebEmojis = ['🎉', '🌟', '⭐', '✨', '🎊', '🏆', '🥳', '🚀', '💫'];
+
+      for (let i = 0; i < 12; i++) {
+        setTimeout(() => {
+          const emoji = document.createElement('div');
+          emoji.className = 'celebration-emoji';
+          emoji.textContent = celebEmojis[Math.floor(Math.random() * celebEmojis.length)];
+          emoji.style.left = (10 + Math.random() * 80) + '%';
+          emoji.style.top = (20 + Math.random() * 60) + '%';
+          document.body.appendChild(emoji);
+
+          setTimeout(() => emoji.remove(), 1000);
+        }, 400 + i * 120);
+      }
+    }
+
+    function resetAfterCelebration() {
+      // Clear everything
+      emojis = [];
+      count = 0;
+      saveState();
+
+      // Reset rocket position
+      rocket.classList.remove('liftoff');
+      flames.classList.remove('active');
+
+      // Clear overlay
+      celebrationOverlay.innerHTML = '';
+
+      // Update display
+      updateDisplay();
+
+      // Re-enable buttons
+      isCelebrating = false;
+      setButtonsDisabled(false);
+    }
+
+    // ==================== STARS BACKGROUND ====================
+
+    function createStars() {
+      const starCount = 100;
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = (Math.random() * 3 + 1) + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 2 + 's';
+        star.style.animationDuration = (Math.random() * 2 + 1) + 's';
+        starsEl.appendChild(star);
+      }
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    btnAdd.addEventListener('click', addEmoji);
+    btnUndo.addEventListener('click', undoEmoji);
+    btnReset.addEventListener('click', resetJar);
+    btnSound.addEventListener('click', toggleSound);
+
+    // ==================== INITIALIZATION ====================
+    createStars();
+    loadState();
+
+    // Ensure buttons are enabled on page load (in case of stuck state)
+    setButtonsDisabled(false);
+    isCelebrating = false;
+  </script>
+</body>
+</html>
